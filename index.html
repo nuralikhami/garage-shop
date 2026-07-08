@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Онлайн Гараж</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        🚗 Онлайн Гараж
+    </div>
+
+    <nav>
+
+        <a href="#">Главная</a>
+        <a href="#products">Товары</a>
+        <a href="#about">Обо мне</a>
+
+    </nav>
+
+</header>
+
+
+<section class="hero">
+
+    <div class="hero-text">
+
+        <h1>
+
+            Добро пожаловать в<br>
+            мой <span>онлайн-гараж</span>
+
+        </h1>
+
+        <p>
+
+            Здесь я продаю вещи и технику,
+            которые мне больше не нужны.
+
+        </p>
+
+        <div class="advantages">
+
+            <div>✔ Всё проверено лично</div>
+            <div>📍 Самовывоз Алматы</div>
+            <div>💬 Честное описание</div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="products" id="products">
+
+<div class="products-header">
+
+<h2>📦 Сейчас в гараже</h2>
+
+<p id="count"></p>
+
+</div>
+
+<div id="cards" class="cards">
+
+</div>
+
+</section>
+
+
+
+<section class="about" id="about">
+
+<h2>Обо мне</h2>
+
+<p>
+
+Привет!
+
+Я Nurik.
+
+Люблю технику и всегда честно описываю товары.
+
+Здесь нет посредников.
+
+Только мои личные вещи.
+
+</p>
+
+</section>
+
+<div id="productModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="close">&times;</span>
+
+        <button id="prevPhoto" class="arrow left">&#10094;</button>
+
+        <img id="modalImage">
+
+        <button id="nextPhoto" class="arrow right">&#10095;</button>
+
+        <div class="modal-info">
+
+            <h2 id="modalTitle"></h2>
+
+            <h3 id="modalPrice"></h3>
+
+            <ul id="modalDescription"></ul>
+
+            <a id="modalWhatsapp"
+               class="buy-btn"
+               target="_blank">
+               💬 Написать в WhatsApp
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
+
+</body>
+
+</html>

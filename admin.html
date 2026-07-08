@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="admin-login" id="login">
+
+    <h1>🔐 Вход</h1>
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Введите пароль">
+
+    <button onclick="login()">
+
+        Войти
+
+    </button>
+
+</div>
+
+<div class="admin-panel" id="panel" style="display:none;">
+
+<h1>🚗 Панель администратора</h1>
+
+<input
+id="title"
+placeholder="Название товара">
+
+<input
+id="price"
+type="number"
+placeholder="Цена">
+
+<textarea
+id="description"
+placeholder="Описание"></textarea>
+
+<select id="status">
+
+<option value="available">В наличии</option>
+
+<option value="reserve">Бронь</option>
+
+<option value="sold">Продано</option>
+
+</select>
+
+<h3>Фотографии товара</h3>
+
+<div class="photo-grid">
+
+    <div class="photo-box">
+        <label>⭐ Главное фото</label>
+        <input type="file" id="photo1" accept="image/*">
+        <img id="preview1" class="preview">
+    </div>
+
+    <div class="photo-box">
+        <label>📷 Фото 2</label>
+        <input type="file" id="photo2" accept="image/*">
+        <img id="preview2" class="preview">
+    </div>
+
+    <div class="photo-box">
+        <label>📷 Фото 3</label>
+        <input type="file" id="photo3" accept="image/*">
+        <img id="preview3" class="preview">
+    </div>
+
+    <div class="photo-box">
+        <label>📷 Фото 4</label>
+        <input type="file" id="photo4" accept="image/*">
+        <img id="preview4" class="preview">
+    </div>
+
+    <div class="photo-box">
+        <label>📷 Фото 5</label>
+        <input type="file" id="photo5" accept="image/*">
+        <img id="preview5" class="preview">
+    </div>
+
+</div>
+
+<button onclick="saveProduct()">
+
+Сохранить товар
+
+</button>
+
+</div>
+
+<script src="admin.js"></script>
+
+</body>
+</html>
