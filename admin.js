@@ -151,3 +151,30 @@ window.onload = ()=>{
     loadAdminProducts();
 
 };
+async function deleteProduct(id){
+
+    const ok = confirm("Удалить этот товар?");
+
+    if(!ok) return;
+
+    const response = await fetch("/api/products/" + id, {
+
+        method:"DELETE"
+
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+
+        alert("✅ Товар удалён");
+
+        loadAdminProducts();
+
+    }else{
+
+        alert("Ошибка удаления");
+
+    }
+
+}
