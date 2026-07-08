@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -55,18 +55,7 @@ app.get("/api/products", (req, res) => {
 });
 
 // Сохранить товар
-// Получить все товары
-app.get("/api/products", (req, res) => {
 
-    if (!fs.existsSync(productsFile)) {
-        return res.json([]);
-    }
-
-    const products = JSON.parse(fs.readFileSync(productsFile));
-
-    res.json(products);
-
-});
 
 app.post("/api/products", upload.array("photos"), (req, res) => {
 
@@ -88,6 +77,22 @@ const product = JSON.parse(req.body.product);
     product.images = req.files.map(file => "/uploads/" + file.filename);
 
     products.push(product);
+
+    fs.writeFileSync(productsFile, JSON.stringify(products, null, 4));
+
+    res.json({
+        success: true
+    });
+
+});
+
+app.delete("/api/products/:id", (req, res) => {
+
+    let products = JSON.parse(fs.readFileSync(productsFile));
+
+    const id = Number(req.params.id);
+
+    products = products.filter(product => product.id !== id);
 
     fs.writeFileSync(productsFile, JSON.stringify(products, null, 4));
 

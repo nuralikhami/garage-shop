@@ -94,3 +94,60 @@ for(let i=1;i<=5;i++){
     });
 
 }
+async function loadAdminProducts(){
+
+    const response = await fetch("/api/products");
+
+    const products = await response.json();
+
+    const list = document.getElementById("productsList");
+
+    list.innerHTML = "";
+
+    products.forEach(product=>{
+
+        list.innerHTML += `
+
+<div class="product-item">
+
+    <img src="${product.images[0]}">
+
+    <div class="product-info">
+
+        <h3>${product.title}</h3>
+
+        <p><b>${product.price} ₸</b></p>
+
+        <p>${product.status}</p>
+
+    </div>
+
+    <div class="product-actions">
+
+        <button class="edit-btn">
+            ✏️ Редактировать
+        </button>
+
+        <button
+        class="delete-btn"
+        onclick="deleteProduct(${product.id})">
+
+            🗑️ Удалить
+
+        </button>
+
+    </div>
+
+</div>
+
+`;
+
+    });
+
+}
+
+window.onload = ()=>{
+
+    loadAdminProducts();
+
+};
