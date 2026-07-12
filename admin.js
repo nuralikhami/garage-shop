@@ -200,11 +200,8 @@ async function deleteProduct(id){
 
 }
 async function editProduct(id){
-    async function editProduct(id){
 
     alert("Редактирование: " + id);
-
-    const response = await fetch("/api/products");
 
     const response = await fetch("/api/products");
 
@@ -217,25 +214,17 @@ async function editProduct(id){
     editingId = id;
 
     document.getElementById("title").value = product.title;
-
     document.getElementById("price").value = product.price;
-
     document.getElementById("description").value =
         product.description.join("\n");
-
-    document.getElementById("status").value =
-        product.status;
+    document.getElementById("status").value = product.status;
 
     document.querySelector(".admin-panel button").innerText =
         "💾 Сохранить изменения";
 
     window.scrollTo({
-
-        top:0,
-
-        behavior:"smooth"
-
+        top: 0,
+        behavior: "smooth"
     });
 
-}
 }
