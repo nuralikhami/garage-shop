@@ -1,4 +1,5 @@
 const ADMIN_PASSWORD = "12345";
+let editingId = null;
 
 function login() {
     const pass = document.getElementById("password").value;
@@ -50,20 +51,36 @@ async function saveProduct() {
 
     }
 
-    const response = await fetch("/api/products", {
-        method: "POST",
-        body: formData
-    });
+   let url = "/api/products";
+let method = "POST";
+
+if (editingId !== null) {
+
+    url = "/api/products/" + editingId;
+    method = "PUT";
+
+}
+
+const response = await fetch(url, {
+    method: method,
+    body: formData
+});
 
     const result = await response.json();
 
-    if (result.success) {
+   if (result.success) {
 
-        alert("✅ Товар успешно сохранён!");
+    alert(
+        editingId === null
+        ? "✅ Товар успешно добавлен!"
+        : "✅ Изменения сохранены!"
+    );
 
-        location.reload();
+    editingId = null;
 
-    } else {
+    location.reload();
+
+}else {
 
         alert("❌ Ошибка при сохранении.");
 
@@ -124,9 +141,13 @@ async function loadAdminProducts(){
 
     <div class="product-actions">
 
-        <button class="edit-btn">
-            ✏️ Редактировать
-        </button>
+       <button
+class="edit-btn"
+onclick="editProduct(${product.id})">
+
+    ✏️ Редактировать
+
+</button>
 
         <button
         class="delete-btn"
@@ -176,5 +197,39 @@ async function deleteProduct(id){
         alert("Ошибка удаления");
 
     }
+
+}
+async function editProduct(id){
+
+    const response = await fetch("/api/products");
+
+    const products = await response.json();
+
+    const product = products.find(p => p.id === id);
+
+    if(!product) return;
+
+    editingId = id;
+
+    document.getElementById("title").value = product.title;
+
+    document.getElementById("price").value = product.price;
+
+    document.getElementById("description").value =
+        product.description.join("\n");
+
+    document.getElementById("status").value =
+        product.status;
+
+    document.querySelector(".admin-panel button").innerText =
+        "💾 Сохранить изменения";
+
+    window.scrollTo({
+
+        top:0,
+
+        behavior:"smooth"
+
+    });
 
 }

@@ -102,6 +102,49 @@ app.delete("/api/products/:id", (req, res) => {
 
 });
 
+app.put("/api/products/:id", upload.array("photos"), (req, res) => {
+
+    let products = JSON.parse(fs.readFileSync(productsFile));
+
+    const id = Number(req.params.id);
+
+    const newData = JSON.parse(req.body.product);
+
+    const index = products.findIndex(product => product.id === id);
+
+    if (index === -1) {
+
+        return res.status(404).json({
+            success: false,
+            message: "Товар не найден"
+        });
+
+    }
+
+    newData.id = id;
+
+    // Если загрузили новые фото — заменяем
+    if (req.files.length > 0) {
+
+        newData.images = req.files.map(file => "/uploads/" + file.filename);
+
+    } else {
+
+        // Если фото не меняли — оставляем старые
+        newData.images = products[index].images;
+
+    }
+
+    products[index] = newData;
+
+    fs.writeFileSync(productsFile, JSON.stringify(products, null, 4));
+
+    res.json({
+        success: true
+    });
+
+});
+
 app.listen(PORT, () => {
 
     console.log("==================================");
