@@ -200,6 +200,11 @@ async function deleteProduct(id){
 
 }
 async function editProduct(id){
+    async function editProduct(id){
+
+    alert("Редактирование: " + id);
+
+    const response = await fetch("/api/products");
 
     const response = await fetch("/api/products");
 
@@ -232,4 +237,5 @@ async function editProduct(id){
 
     });
 
+}
 }
