@@ -86,6 +86,54 @@ const product = JSON.parse(req.body.product);
 
 });
 
+app.put("/api/products/:id", upload.array("photos"), (req, res) => {
+
+    let products = [];
+
+    if (fs.existsSync(productsFile)) {
+        products = JSON.parse(fs.readFileSync(productsFile));
+    }
+
+    const id = Number(req.params.id);
+
+    const updatedProduct = JSON.parse(req.body.product);
+
+    const index = products.findIndex(product => product.id === id);
+
+    if (index === -1) {
+
+        return res.json({
+            success: false
+        });
+
+    }
+
+    updatedProduct.id = id;
+
+    // Если загрузили новые фото
+    if (req.files.length > 0) {
+
+        updatedProduct.images = req.files.map(file =>
+            "/uploads/" + file.filename
+        );
+
+    } else {
+
+        // Иначе оставить старые
+        updatedProduct.images = products[index].images;
+
+    }
+
+    products[index] = updatedProduct;
+
+    fs.writeFileSync(productsFile, JSON.stringify(products, null, 4));
+
+    res.json({
+        success: true
+    });
+
+});
+
 app.delete("/api/products/:id", (req, res) => {
 
     let products = JSON.parse(fs.readFileSync(productsFile));
