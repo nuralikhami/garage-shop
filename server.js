@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
+const db = require("./database");
 
 const storage = multer.diskStorage({
 
@@ -36,21 +36,32 @@ app.use(express.static(__dirname));
 // Папка с фотографиями
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Файл с товарами
-const productsFile = path.join(__dirname, "data", "products.json");
-
 // Получить все товары
 app.get("/api/products", (req, res) => {
 
-    if (!fs.existsSync(productsFile)) {
+    db.all("SELECT * FROM products ORDER BY id DESC", [], (err, rows) => {
 
-        return res.json([]);
+        if (err) {
 
-    }
+            return res.status(500).json(err);
 
-    const products = JSON.parse(fs.readFileSync(productsFile));
+        }
 
-    res.json(products);
+        const products = rows.map(product => ({
+
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            status: product.status,
+            new: product.isNew === 1,
+            description: JSON.parse(product.description),
+            images: JSON.parse(product.images)
+
+        }));
+
+        res.json(products);
+
+    });
 
 });
 
@@ -59,139 +70,135 @@ app.get("/api/products", (req, res) => {
 
 app.post("/api/products", upload.array("photos"), (req, res) => {
 
-    let products = [];
+    const product = JSON.parse(req.body.product);
 
-    if (fs.existsSync(productsFile)) {
+    const images = req.files.map(file => "/uploads/" + file.filename);
 
-        products = JSON.parse(fs.readFileSync(productsFile));
+    db.run(
+        `INSERT INTO products
+        (title, price, status, isNew, description, images)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+            product.title,
+            product.price,
+            product.status,
+            product.new ? 1 : 0,
+            JSON.stringify(product.description),
+            JSON.stringify(images)
+        ],
+        function(err){
 
-    }
-console.log(req.body);
-console.log(req.files);
+            if(err){
 
-const product = JSON.parse(req.body.product);
+                console.log(err);
 
+                return res.json({success:false});
 
-    product.id = Date.now();
+            }
 
-    product.images = req.files.map(file => "/uploads/" + file.filename);
+            res.json({success:true});
 
-    products.push(product);
+        }
 
-    fs.writeFileSync(productsFile, JSON.stringify(products, null, 4));
-
-    res.json({
-        success: true
-    });
+    );
 
 });
 
+
 app.put("/api/products/:id", upload.array("photos"), (req, res) => {
-
-    let products = [];
-
-    if (fs.existsSync(productsFile)) {
-        products = JSON.parse(fs.readFileSync(productsFile));
-    }
 
     const id = Number(req.params.id);
 
-    const updatedProduct = JSON.parse(req.body.product);
+    const product = JSON.parse(req.body.product);
 
-    const index = products.findIndex(product => product.id === id);
+    db.get("SELECT * FROM products WHERE id=?", [id], (err, oldProduct)=>{
 
-    if (index === -1) {
+        if(!oldProduct){
 
-        return res.json({
-            success: false
-        });
+            return res.json({success:false});
 
-    }
+        }
 
-    updatedProduct.id = id;
+        let images = JSON.parse(oldProduct.images);
 
-    // Если загрузили новые фото
-    if (req.files.length > 0) {
+        if(req.files.length){
 
-        updatedProduct.images = req.files.map(file =>
-            "/uploads/" + file.filename
+            images = req.files.map(file=>"/uploads/"+file.filename);
+
+        }
+
+        db.run(
+
+            `UPDATE products
+             SET title=?,
+                 price=?,
+                 status=?,
+                 isNew=?,
+                 description=?,
+                 images=?
+             WHERE id=?`,
+
+            [
+
+                product.title,
+                product.price,
+                product.status,
+                product.new ? 1 : 0,
+                JSON.stringify(product.description),
+                JSON.stringify(images),
+                id
+
+            ],
+
+            function(err){
+
+                if(err){
+
+                    console.log(err);
+
+                    return res.json({success:false});
+
+                }
+
+                res.json({success:true});
+
+            }
+
         );
 
-    } else {
-
-        // Иначе оставить старые
-        updatedProduct.images = products[index].images;
-
-    }
-
-    products[index] = updatedProduct;
-
-    fs.writeFileSync(productsFile, JSON.stringify(products, null, 4));
-
-    res.json({
-        success: true
     });
 
 });
 
-app.delete("/api/products/:id", (req, res) => {
-
-    let products = JSON.parse(fs.readFileSync(productsFile));
+app.delete("/api/products/:id", (req,res)=>{
 
     const id = Number(req.params.id);
 
-    products = products.filter(product => product.id !== id);
+    db.run(
 
-    fs.writeFileSync(productsFile, JSON.stringify(products, null, 4));
+        "DELETE FROM products WHERE id=?",
 
-    res.json({
-        success: true
-    });
+        [id],
 
-});
+        function(err){
 
-app.put("/api/products/:id", upload.array("photos"), (req, res) => {
+            if(err){
 
-    let products = JSON.parse(fs.readFileSync(productsFile));
+                console.log(err);
 
-    const id = Number(req.params.id);
+                return res.json({success:false});
 
-    const newData = JSON.parse(req.body.product);
+            }
 
-    const index = products.findIndex(product => product.id === id);
+            res.json({success:true});
 
-    if (index === -1) {
+        }
 
-        return res.status(404).json({
-            success: false,
-            message: "Товар не найден"
-        });
-
-    }
-
-    newData.id = id;
-
-    // Если загрузили новые фото — заменяем
-    if (req.files.length > 0) {
-
-        newData.images = req.files.map(file => "/uploads/" + file.filename);
-
-    } else {
-
-        // Если фото не меняли — оставляем старые
-        newData.images = products[index].images;
-
-    }
-
-    products[index] = newData;
-
-    fs.writeFileSync(productsFile, JSON.stringify(products, null, 4));
-
-    res.json({
-        success: true
-    });
+    );
 
 });
+
+
 
 app.listen(PORT, () => {
 
