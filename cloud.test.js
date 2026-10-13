@@ -64,6 +64,15 @@ test('Cloud CRUD, photo rollback, admin protection and private files', async () 
         assert.equal(response.status, 200);
         cookie = response.headers.get('set-cookie').split(';')[0];
         assert.equal((await (await call('/api/admin/session')).json()).authenticated, true);
+        const tooLong = await call('/api/products', { method: 'POST', body: form('А'.repeat(301), true) });
+        assert.equal(tooLong.status, 400);
+        assert.match((await tooLong.json()).error, /300/);
+        assert.equal(photos.size, 0);
+        const invalidStatus = new FormData();
+        invalidStatus.append('product', JSON.stringify({ title: 'Товар', price: 100, status: '', description: ['Описание'] }));
+        const statusResponse = await call('/api/products', { method: 'POST', body: invalidStatus });
+        assert.equal(statusResponse.status, 400);
+        assert.match((await statusResponse.json()).error, /статус/);
         assert.equal((await call('/api/products', { method: 'POST', body: form('Товар', true), headers: { Origin: 'https://other.example' } })).status, 403);
         assert.equal((await call('/api/products', { method: 'POST', body: form('Товар', true) })).status, 200);
         assert.equal(products.length, 1);

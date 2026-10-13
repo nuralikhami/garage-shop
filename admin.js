@@ -26,8 +26,16 @@ async function saveProduct() {
     const description = document.getElementById("description").value.trim();
     const status = document.getElementById("status").value;
 
-    if (!title || !price || !description) {
-        alert("Заполни все поля.");
+    if (!title || !document.getElementById("price").value.trim() || !description) {
+        alert("Заполните название, цену и описание.");
+        return;
+    }
+    if (title.length > 300) {
+        alert("Название слишком длинное: максимум 300 символов. Подробности перенесите в описание.");
+        return;
+    }
+    if (!Number.isFinite(price) || price < 0) {
+        alert("Введите цену числом, не меньше нуля.");
         return;
     }
 

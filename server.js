@@ -65,7 +65,13 @@ function normalize(row) {
 function productInput(req) {
     let p;
     try { p = JSON.parse(req.body.product); } catch { throw Object.assign(new Error('Некорректные данные товара'), { status: 400 }); }
-    if (typeof p.title !== 'string' || !p.title.trim() || p.title.length > 300 || typeof p.price !== 'number' || !Number.isFinite(p.price) || p.price < 0 || !['available', 'reserve', 'sold'].includes(p.status) || !Array.isArray(p.description) || p.description.some(x => typeof x !== 'string')) throw Object.assign(new Error('Проверьте название, цену и описание'), { status: 400 });
+    const invalid = message => { throw Object.assign(new Error(message), { status: 400 }); };
+    if (!p || typeof p !== 'object') invalid('Некорректные данные товара');
+    if (typeof p.title !== 'string' || !p.title.trim()) invalid('Введите название товара');
+    if (p.title.trim().length > 300) invalid('Название слишком длинное: максимум 300 символов. Подробности перенесите в описание.');
+    if (typeof p.price !== 'number' || !Number.isFinite(p.price) || p.price < 0) invalid('Введите цену числом, не меньше нуля');
+    if (!['available', 'reserve', 'sold'].includes(p.status)) invalid('Выберите статус товара заново: В наличии, Бронь или Продано');
+    if (!Array.isArray(p.description) || p.description.some(x => typeof x !== 'string')) invalid('Некорректный формат описания. Обновите страницу и введите описание заново.');
     return { title: p.title.trim(), price: p.price, status: p.status, new: Boolean(p.new), description: p.description };
 }
 function productId(req) {
