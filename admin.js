@@ -1,18 +1,25 @@
-const ADMIN_PASSWORD = "12345";
 let editingId = null;
-
-function login() {
-    const pass = document.getElementById("password").value;
-
-    if (pass === ADMIN_PASSWORD) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("panel").style.display = "block";
-    } else {
-        alert("Неверный пароль");
-    }
+async function login() {
+    try {
+        const response = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: document.getElementById('password').value }) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+        document.getElementById('password').value = '';
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        await loadAdminProducts();
+    } catch (error) { alert(error.message || 'Не удалось войти'); }
 }
-
+async function adminFetch(url, options = {}) {
+    const response = await fetch(url, options);
+    if (response.status === 401) {
+        document.getElementById('login').style.display = 'block';
+        document.getElementById('panel').style.display = 'none';
+    }
+    return response;
+}
 async function saveProduct() {
+    try {
 
     const title = document.getElementById("title").value.trim();
     const price = Number(document.getElementById("price").value);
@@ -61,7 +68,7 @@ if (editingId !== null) {
 
 }
 
-const response = await fetch(url, {
+const response = await adminFetch(url, {
     method: method,
     body: formData
 });
@@ -82,15 +89,12 @@ const response = await fetch(url, {
 
 }else {
 
-        alert("❌ Ошибка при сохранении.");
+        alert(result.error || "❌ Ошибка при сохранении.");
 
     }
 
+    } catch { alert("Не удалось сохранить товар. Проверьте соединение и попробуйте снова."); }
 }
-
-
-
-
 
 for(let i=1;i<=5;i++){
 
@@ -167,18 +171,25 @@ onclick="editProduct(${product.id})">
 
 }
 
-window.onload = ()=>{
-
-    loadAdminProducts();
-
+window.onload = async () => {
+    try {
+        const response = await fetch('/api/admin/session');
+        const result = await response.json();
+        if (result.authenticated) {
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('panel').style.display = 'block';
+            await loadAdminProducts();
+        }
+    } catch { alert('Не удалось подключиться к серверу'); }
 };
 async function deleteProduct(id){
+    try {
 
     const ok = confirm("Удалить этот товар?");
 
     if(!ok) return;
 
-    const response = await fetch("/api/products/" + id, {
+    const response = await adminFetch("/api/products/" + id, {
 
         method:"DELETE"
 
@@ -198,6 +209,7 @@ async function deleteProduct(id){
 
     }
 
+    } catch { alert("Не удалось удалить товар. Попробуйте снова."); }
 }
 async function editProduct(id){
 
